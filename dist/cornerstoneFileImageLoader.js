@@ -1,4 +1,4 @@
-/*! cornerstone-file-image-loader - v0.5.1 - 2015-04-04 | (c) 2014 Chris Hafey | https://github.com/chafey/cornerstoneFileImageLoader */
+/*! cornerstone-file-image-loader - v0.5.1 - 2016-05-04 | (c) 2014 Chris Hafey | https://github.com/chafey/cornerstoneFileImageLoader */
 //
 // This is a cornerstone image loader for DICOM P10 files.  It currently does not support compressed
 // transfer syntaxes or big endian transfer syntaxes.  It will support implicit little endian transfer
