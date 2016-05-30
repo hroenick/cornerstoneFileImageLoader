@@ -87,10 +87,11 @@ var cornerstoneFileImageLoader = (function ($, cornerstone, cornerstoneFileImage
             return deferred;
         }
 
-        var fileIndex = parseInt(url);
-        var file = cornerstoneFileImageLoader.getFile(fileIndex);
+        //var fileIndex = parseInt(url);
+        //var file = cornerstoneFileImageLoader.getFile(fileIndex);
+        var file = url;
         if(file === undefined) {
-            deferred.reject('unknown file index ' + url);
+            deferred.reject('unknown file path ' + url);
             return deferred;
         }
 
@@ -115,8 +116,21 @@ var cornerstoneFileImageLoader = (function ($, cornerstone, cornerstoneFileImage
                 deferred.reject();
             });
         };
-        fileReader.readAsArrayBuffer(file);
 
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.status === 200 && xmlhttp.readyState === 4) {
+                var arraybuffer = xmlhttp.response;
+                fileReader.readAsArrayBuffer(arraybuffer);
+            }
+            else {
+                deferred.reject('failed accessing local file \"' + file  + '\". (' + xmlhttp.status + ')' );
+                return deferred;
+            }
+        };
+        xmlhttp.open("GET", file, false);
+        xmlhttp.resposeType = 'arraybuffer';
+        xmlhttp.send();
         return deferred;
     }
 
