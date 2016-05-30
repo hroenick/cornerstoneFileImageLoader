@@ -1,4 +1,4 @@
-/*! cornerstone-file-image-loader - v0.5.1 - 2016-05-04 | (c) 2014 Chris Hafey | https://github.com/chafey/cornerstoneFileImageLoader */
+/*! cornerstone-file-image-loader - v0.5.1 - 2016-05-30 | (c) 2014 Chris Hafey | https://github.com/chafey/cornerstoneFileImageLoader */
 //
 // This is a cornerstone image loader for DICOM P10 files.  It currently does not support compressed
 // transfer syntaxes or big endian transfer syntaxes.  It will support implicit little endian transfer
@@ -88,10 +88,11 @@ var cornerstoneFileImageLoader = (function ($, cornerstone, cornerstoneFileImage
             return deferred;
         }
 
-        var fileIndex = parseInt(url);
-        var file = cornerstoneFileImageLoader.getFile(fileIndex);
+        //var fileIndex = parseInt(url);
+        //var file = cornerstoneFileImageLoader.getFile(fileIndex);
+        var file = url;
         if(file === undefined) {
-            deferred.reject('unknown file index ' + url);
+            deferred.reject('unknown file path ' + url);
             return deferred;
         }
 
@@ -116,8 +117,21 @@ var cornerstoneFileImageLoader = (function ($, cornerstone, cornerstoneFileImage
                 deferred.reject();
             });
         };
-        fileReader.readAsArrayBuffer(file);
 
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.status === 200 && xmlhttp.readyState === 4) {
+                var arraybuffer = xmlhttp.response;
+                fileReader.readAsArrayBuffer(arraybuffer);
+            }
+            else {
+                deferred.reject('failed accessing local file \"' + file  + '\". (' + xmlhttp.status + ')' );
+                return deferred;
+            }
+        };
+        xmlhttp.open("GET", file, false);
+        xmlhttp.resposeType = 'arraybuffer';
+        xmlhttp.send();
         return deferred;
     }
 
