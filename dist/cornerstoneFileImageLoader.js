@@ -1,3 +1,4 @@
+/*! cornerstone-file-image-loader - v0.5.1 - 2016-06-01 | (c) 2014 Chris Hafey | https://github.com/chafey/cornerstoneFileImageLoader */
 /*! cornerstone-file-image-loader - v0.5.1 - 2016-05-31 | (c) 2014 Chris Hafey | https://github.com/chafey/cornerstoneFileImageLoader */
 //
 // This is a cornerstone image loader for DICOM P10 files.  It currently does not support compressed
@@ -23,8 +24,7 @@ var cornerstoneFileImageLoader = (function ($, cornerstone, cornerstoneFileImage
 
         // build a url by parsing out the url scheme and frame index from the imageId
         var url = parsedImageId.url;
-        url = url.substring(12);
-        var file = url;
+        var file = url.substring(2);
         if (file === undefined) {
             deferred.reject('unknown file path ' + url);
             return deferred;
@@ -37,7 +37,13 @@ var cornerstoneFileImageLoader = (function ($, cornerstone, cornerstoneFileImage
             var dicomPart10AsArrayBuffer = e.target.result;
             var byteArray = new Uint8Array(dicomPart10AsArrayBuffer);
             var dataSet = dicomParser.parseDicom(byteArray);
-            deferred.resolve(dataSet);
+
+            var imagePromise = cornerstoneWADOImageLoader.createImageObject(dataSet, imageId, parsedImageId.frame);
+            imagePromise.then(function (image) {
+                deferred.resolve(image);
+            }, function (error) {
+                deferred.reject(error);
+            });
         };
 
         var xmlhttp = new XMLHttpRequest();
@@ -49,7 +55,7 @@ var cornerstoneFileImageLoader = (function ($, cornerstone, cornerstoneFileImage
                     fileReader.readAsArrayBuffer(blob);
                 }
                 else {
-                    console.err('failed: ' + file);
+                    console.log('failed: ' + file);
                     deferred.reject('failed accessing local file \"' + file + '\". (' + xmlhttp.status + ')');
                     return deferred;
                 }
@@ -67,35 +73,3 @@ var cornerstoneFileImageLoader = (function ($, cornerstone, cornerstoneFileImage
 
     return cornerstoneFileImageLoader;
 }($, cornerstone, cornerstoneFileImageLoader));
-/**
- */
-var cornerstoneFileImageLoader = (function (cornerstoneFileImageLoader) {
-
-    "use strict";
-
-    if(cornerstoneFileImageLoader === undefined) {
-        cornerstoneFileImageLoader = {};
-    }
-
-    var files = [];
-
-    function addFile(file) {
-        var fileIndex =  files.push(file);
-        return fileIndex - 1;
-    }
-
-    function getFile(index) {
-        return files[index];
-    }
-
-    function purge() {
-        files = [];
-    }
-
-    // module exports
-    cornerstoneFileImageLoader.addFile = addFile;
-    cornerstoneFileImageLoader.getFile = getFile;
-    cornerstoneFileImageLoader.purge = purge;
-
-    return cornerstoneFileImageLoader;
-}(cornerstoneFileImageLoader));
